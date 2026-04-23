@@ -1,5 +1,5 @@
 <h1 align="center">
-        🚅 LiteLLM
+        🚅 LiteLLM (HKPC is NOT the author, this repo is for bug fixes and patches only)
     </h1>
     <p align="center">
         <p align="center">LiteLLM AI Gateway
