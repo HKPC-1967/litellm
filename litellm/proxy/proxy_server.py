@@ -235,23 +235,12 @@ from litellm.litellm_core_utils.litellm_logging import Logging as LiteLLMLogging
 from litellm.litellm_core_utils.sensitive_data_masker import SensitiveDataMasker
 from litellm.llms.custom_httpx.http_handler import AsyncHTTPHandler, HTTPHandler
 from litellm.llms.vertex_ai.vertex_llm_base import VertexBase
-from litellm.proxy._experimental.mcp_server.byok_oauth_endpoints import (
-    router as mcp_byok_oauth_router,
-)
-from litellm.proxy._experimental.mcp_server.discoverable_endpoints import (
-    router as mcp_discoverable_endpoints_router,
-)
-from litellm.proxy._experimental.mcp_server.rest_endpoints import (
-    router as mcp_rest_endpoints_router,
-)
-from litellm.proxy._experimental.mcp_server.server import app as mcp_app
-from litellm.proxy._experimental.mcp_server.tool_registry import (
-    global_mcp_tool_registry,
-)
+# MCP routers + mcp_app + tool_registry are imported lazily inside
+# _register_optional_feature_routers / _init_non_llm_configs so their ~300 MB
+# Pydantic schema chain is only paid when MCP is actually configured
+# (via supported_db_objects: ["mcp", ...]).
 from litellm.proxy._types import *
-from litellm.proxy.agent_endpoints.a2a_endpoints import router as a2a_router
 from litellm.proxy.agent_endpoints.agent_registry import global_agent_registry
-from litellm.proxy.agent_endpoints.endpoints import router as agent_endpoints_router
 from litellm.proxy.agent_endpoints.model_list_helpers import (
     append_agents_to_model_group,
     append_agents_to_model_info,
@@ -259,13 +248,8 @@ from litellm.proxy.agent_endpoints.model_list_helpers import (
 from litellm.proxy.analytics_endpoints.analytics_endpoints import (
     router as analytics_router,
 )
-from litellm.proxy.anthropic_endpoints.claude_code_endpoints import (
-    claude_code_marketplace_router,
-)
-from litellm.proxy.anthropic_endpoints.endpoints import router as anthropic_router
-from litellm.proxy.anthropic_endpoints.skills_endpoints import (
-    router as anthropic_skills_router,
-)
+# claude_code_marketplace_router, anthropic_router, anthropic_skills_router
+# are all gated inside _register_optional_feature_routers
 from litellm.proxy.auth.auth_checks import (
     ExperimentalUIJWTToken,
     get_team_object,
@@ -326,8 +310,7 @@ from litellm.proxy.db.exception_handler import PrismaDBExceptionHandler
 from litellm.proxy.discovery_endpoints import ui_discovery_endpoints_router
 from litellm.proxy.fine_tuning_endpoints.endpoints import router as fine_tuning_router
 from litellm.proxy.fine_tuning_endpoints.endpoints import set_fine_tuning_config
-from litellm.proxy.google_endpoints.endpoints import router as google_router
-from litellm.proxy.guardrails.guardrail_endpoints import router as guardrails_router
+# google_router gated inside _register_optional_feature_routers
 from litellm.proxy.guardrails.init_guardrails import (
     init_guardrails_v2,
     initialize_guardrails,
@@ -343,9 +326,7 @@ from litellm.proxy.hooks.prompt_injection_detection import (
 from litellm.proxy.hooks.proxy_track_cost_callback import _ProxyDBLogger
 from litellm.proxy.image_endpoints.endpoints import router as image_router
 from litellm.proxy.litellm_pre_call_utils import add_litellm_data_to_request
-from litellm.proxy.management_endpoints.access_group_endpoints import (
-    router as access_group_router,
-)
+# access_group_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.budget_management_endpoints import (
     router as budget_management_router,
 )
@@ -359,12 +340,7 @@ from litellm.proxy.management_endpoints.common_utils import (
     _user_has_admin_privileges,
     admin_can_invite_user,
 )
-from litellm.proxy.management_endpoints.compliance_endpoints import (
-    router as compliance_router,
-)
-from litellm.proxy.management_endpoints.config_override_endpoints import (
-    router as config_override_router,
-)
+# compliance_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.cost_tracking_settings import (
     router as cost_tracking_settings_router,
 )
@@ -378,9 +354,7 @@ from litellm.proxy.management_endpoints.internal_user_endpoints import (
     router as internal_user_router,
 )
 from litellm.proxy.management_endpoints.internal_user_endpoints import user_update
-from litellm.proxy.management_endpoints.jwt_key_mapping_endpoints import (
-    router as jwt_key_mapping_router,
-)
+# jwt_key_mapping_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.key_management_endpoints import (
     delete_verification_tokens,
     duration_in_seconds,
@@ -388,9 +362,6 @@ from litellm.proxy.management_endpoints.key_management_endpoints import (
 )
 from litellm.proxy.management_endpoints.key_management_endpoints import (
     router as key_management_router,
-)
-from litellm.proxy.management_endpoints.mcp_management_endpoints import (
-    router as mcp_management_router,
 )
 from litellm.proxy.management_endpoints.model_access_group_management_endpoints import (
     router as model_access_group_management_router,
@@ -406,14 +377,11 @@ from litellm.proxy.management_endpoints.model_management_endpoints import (
 from litellm.proxy.management_endpoints.organization_endpoints import (
     router as organization_router,
 )
-from litellm.proxy.management_endpoints.policy_endpoints import router as policy_router
-from litellm.proxy.management_endpoints.project_endpoints import (
-    router as project_router,
-)
+# project_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.router_settings_endpoints import (
     router as router_settings_router,
 )
-from litellm.proxy.management_endpoints.scim.scim_v2 import scim_router
+# scim_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.tag_management_endpoints import (
     router as tag_management_router,
 )
@@ -425,14 +393,11 @@ from litellm.proxy.management_endpoints.team_endpoints import (
     update_team,
     validate_membership,
 )
-from litellm.proxy.management_endpoints.tool_management_endpoints import (
-    router as tool_management_router,
-)
 from litellm.proxy.management_endpoints.ui_sso import (
     get_disabled_non_admin_personal_key_creation,
 )
 from litellm.proxy.management_endpoints.ui_sso import router as ui_sso_router
-from litellm.proxy.management_endpoints.usage_endpoints import router as usage_ai_router
+# usage_ai_router gated inside _register_optional_feature_routers
 from litellm.proxy.management_endpoints.user_agent_analytics_endpoints import (
     router as user_agent_analytics_router,
 )
@@ -442,7 +407,7 @@ from litellm.proxy.middleware.in_flight_requests_middleware import (
 )
 from litellm.proxy.middleware.prometheus_auth_middleware import PrometheusAuthMiddleware
 from litellm.proxy.ocr_endpoints.endpoints import router as ocr_router
-from litellm.proxy.openai_evals_endpoints.endpoints import router as evals_router
+# evals_router gated inside _register_optional_feature_routers
 from litellm.proxy.openai_files_endpoints.files_endpoints import (
     router as openai_files_router,
 )
@@ -462,27 +427,20 @@ from litellm.proxy.pass_through_endpoints.pass_through_endpoints import (
 from litellm.proxy.pass_through_endpoints.pass_through_endpoints import (
     router as pass_through_router,
 )
-from litellm.proxy.policy_engine.policy_endpoints import router as policy_crud_router
-from litellm.proxy.policy_engine.policy_resolve_endpoints import (
-    router as policy_resolve_router,
-)
-from litellm.proxy.prompts.prompt_endpoints import router as prompts_router
+# prompts_router gated inside _register_optional_feature_routers
 from litellm.proxy.public_endpoints import router as public_endpoints_router
 from litellm.proxy.rag_endpoints.endpoints import router as rag_router
-from litellm.proxy.realtime_endpoints.endpoints import router as webrtc_router
+# webrtc_router gated inside _register_optional_feature_routers
 from litellm.proxy.rerank_endpoints.endpoints import router as rerank_router
 from litellm.proxy.response_api_endpoints.endpoints import router as response_router
 from litellm.proxy.route_llm_request import route_request
 from litellm.proxy.search_endpoints.endpoints import router as search_router
-from litellm.proxy.search_endpoints.search_tool_management import (
-    router as search_tool_management_router,
-)
-from litellm.proxy.spend_tracking.cloudzero_endpoints import router as cloudzero_router
+# cloudzero_router gated inside _register_optional_feature_routers
 from litellm.proxy.spend_tracking.spend_management_endpoints import (
     router as spend_management_router,
 )
 from litellm.proxy.spend_tracking.spend_tracking_utils import get_logging_payload
-from litellm.proxy.spend_tracking.vantage_endpoints import router as vantage_router
+# vantage_router gated inside _register_optional_feature_routers
 from litellm.proxy.types_utils.utils import get_instance_fn
 from litellm.proxy.ui_crud_endpoints.proxy_setting_endpoints import (
     router as ui_crud_endpoints_router,
@@ -508,16 +466,7 @@ from litellm.proxy.utils import (
     model_dump_with_preserved_fields,
     update_spend,
 )
-from litellm.proxy.vector_store_endpoints.endpoints import router as vector_store_router
-from litellm.proxy.vector_store_endpoints.management_endpoints import (
-    router as vector_store_management_router,
-)
-from litellm.proxy.vector_store_files_endpoints.endpoints import (
-    router as vector_store_files_router,
-)
-from litellm.proxy.vertex_ai_endpoints.langfuse_endpoints import (
-    router as langfuse_router,
-)
+# langfuse_router gated inside _register_optional_feature_routers
 from litellm.proxy.video_endpoints.endpoints import router as video_router
 from litellm.router import (
     AssistantsTypedDict,
@@ -3826,6 +3775,12 @@ class ProxyConfig:
         ## MCP TOOLS
         mcp_tools_config = config.get("mcp_tools", None)
         if mcp_tools_config:
+            # Deferred: importing tool_registry pulls in the MCP Pydantic schema
+            # chain (~300 MB). Only pay the cost when MCP tools are configured.
+            from litellm.proxy._experimental.mcp_server.tool_registry import (
+                global_mcp_tool_registry,
+            )
+
             global_mcp_tool_registry.load_tools_from_config(mcp_tools_config)
 
         ## AGENTS
@@ -14092,6 +14047,262 @@ async def get_routes():
 #     return {"token": token}
 
 
+def _should_import_feature(name: str) -> bool:
+    """
+    Module-load-time version of `_should_load_db_object`.
+
+    Reads the `LITELLM_SUPPORTED_DB_OBJECTS` env var (comma-separated list) and
+    returns True when the env var is unset (backward-compat default: load
+    everything) or when `name` is in the list. This must be a module-load-time
+    check — `general_settings.supported_db_objects` (used by the DB-loading
+    gate) is only populated inside the lifespan, *after* module imports have
+    already executed. Gating imports requires an env var, not a YAML key.
+
+    Deployments that want memory savings set e.g.
+
+        environment:
+          LITELLM_SUPPORTED_DB_OBJECTS: "models,cache_settings,anthropic_beta_headers"
+
+    to skip importing feature routers for everything else.
+    """
+    raw = os.environ.get("LITELLM_SUPPORTED_DB_OBJECTS")
+    if raw is None:
+        return True
+    allowed = {s.strip() for s in raw.split(",") if s.strip()}
+    return name in allowed
+
+
+def _register_optional_feature_routers(app: FastAPI) -> None:
+    """
+    Mount optional feature routers, gated on `LITELLM_SUPPORTED_DB_OBJECTS`.
+
+    Why this function exists:
+        Every import pulled in by a feature router loads hundreds of Pydantic
+        models at process startup — each one adds FieldInfo, SchemaValidator,
+        TypedDict metaclasses, ForwardRef nodes, and Dependant graph entries to
+        memory. For proxies that don't use a given feature, those imports are
+        pure overhead. On a typical 2-worker pod this accumulates to ~800 MB.
+
+        Gating the **import** itself (not just `app.include_router(...)`) is the
+        only way to avoid the cost — once a module is imported, its classes and
+        schema cache stay rooted in `sys.modules` / Pydantic's global cache for
+        the lifetime of the process.
+
+    Pattern:
+        This deliberately breaks the CLAUDE.md "imports at top of file" rule
+        for the same reason `_initialize_mcp_semantic_filter` already does.
+        Imports happen inside the gated branch only.
+
+    Gate semantics:
+        Uses `_should_import_feature(name)` which reads the
+        `LITELLM_SUPPORTED_DB_OBJECTS` env var. Unset → everything loads
+        (backwards-compatible, matches pre-PR behavior). Set to a CSV like
+        `"models,cache_settings"` → only those features' routers import.
+
+        The env var intentionally mirrors the `general_settings.supported_db_objects`
+        YAML key (same semantics, same allowed values) but lives at the process
+        level so it can be read before any YAML is loaded. Deployments that use
+        the YAML key should also set the env var to get memory savings.
+    """
+    if _should_import_feature("guardrails"):
+        from litellm.proxy.guardrails.guardrail_endpoints import (
+            router as guardrails_router,
+        )
+
+        app.include_router(guardrails_router)
+
+    if _should_import_feature("policies"):
+        from litellm.proxy.management_endpoints.policy_endpoints import (
+            router as policy_router,
+        )
+        from litellm.proxy.policy_engine.policy_endpoints import (
+            router as policy_crud_router,
+        )
+        from litellm.proxy.policy_engine.policy_resolve_endpoints import (
+            router as policy_resolve_router,
+        )
+
+        app.include_router(policy_router)
+        app.include_router(policy_crud_router)
+        app.include_router(policy_resolve_router)
+
+    if _should_import_feature("agents"):
+        from litellm.proxy.agent_endpoints.a2a_endpoints import router as a2a_router
+        from litellm.proxy.agent_endpoints.endpoints import (
+            router as agent_endpoints_router,
+        )
+
+        app.include_router(agent_endpoints_router)
+        app.include_router(a2a_router)
+
+    if _should_import_feature("vector_stores"):
+        from litellm.proxy.vector_store_endpoints.endpoints import (
+            router as vector_store_router,
+        )
+        from litellm.proxy.vector_store_endpoints.management_endpoints import (
+            router as vector_store_management_router,
+        )
+        from litellm.proxy.vector_store_files_endpoints.endpoints import (
+            router as vector_store_files_router,
+        )
+
+        app.include_router(vector_store_router)
+        app.include_router(vector_store_management_router)
+        app.include_router(vector_store_files_router)
+
+    if _should_import_feature("tools"):
+        from litellm.proxy.management_endpoints.tool_management_endpoints import (
+            router as tool_management_router,
+        )
+
+        app.include_router(tool_management_router)
+
+    if _should_import_feature("search_tools"):
+        from litellm.proxy.search_endpoints.search_tool_management import (
+            router as search_tool_management_router,
+        )
+
+        app.include_router(search_tool_management_router)
+
+    if _should_import_feature("mcp"):
+        # MCP is the largest single chain — gating it recovers most of the ~300 MB
+        # shared Pydantic-schema cost that also burdens config_override_endpoints.
+        from litellm.proxy._experimental.mcp_server.byok_oauth_endpoints import (
+            router as mcp_byok_oauth_router,
+        )
+        from litellm.proxy._experimental.mcp_server.discoverable_endpoints import (
+            router as mcp_discoverable_endpoints_router,
+        )
+        from litellm.proxy._experimental.mcp_server.rest_endpoints import (
+            router as mcp_rest_endpoints_router,
+        )
+        from litellm.proxy._experimental.mcp_server.server import app as mcp_app
+        from litellm.proxy.management_endpoints.mcp_management_endpoints import (
+            router as mcp_management_router,
+        )
+
+        app.include_router(mcp_management_router)
+        app.include_router(mcp_byok_oauth_router)
+        app.include_router(mcp_rest_endpoints_router)
+        app.include_router(mcp_discoverable_endpoints_router)
+        app.mount(path=BASE_MCP_ROUTE, app=mcp_app)
+
+    if _should_import_feature("config_overrides"):
+        from litellm.proxy.management_endpoints.config_override_endpoints import (
+            router as config_override_router,
+        )
+
+        app.include_router(config_override_router)
+
+    # ---- Phase 3: long-tail optional features ----
+    # Each adds ~10-20 MB of Pydantic schema/route-metadata overhead when imported.
+    # Not huge individually, but ~150-200 MB combined for deployments that use
+    # none of them.
+
+    if _should_import_feature("realtime"):
+        from litellm.proxy.realtime_endpoints.endpoints import router as webrtc_router
+
+        app.include_router(webrtc_router)
+
+    if _should_import_feature("anthropic_passthrough"):
+        from litellm.proxy.anthropic_endpoints.endpoints import (
+            router as anthropic_router,
+        )
+        from litellm.proxy.anthropic_endpoints.skills_endpoints import (
+            router as anthropic_skills_router,
+        )
+
+        app.include_router(anthropic_router)
+        app.include_router(anthropic_skills_router)
+
+    if _should_import_feature("google_passthrough"):
+        from litellm.proxy.google_endpoints.endpoints import router as google_router
+
+        app.include_router(google_router)
+
+    if _should_import_feature("langfuse_passthrough"):
+        from litellm.proxy.vertex_ai_endpoints.langfuse_endpoints import (
+            router as langfuse_router,
+        )
+
+        app.include_router(langfuse_router)
+
+    if _should_import_feature("evals"):
+        from litellm.proxy.openai_evals_endpoints.endpoints import (
+            router as evals_router,
+        )
+
+        app.include_router(evals_router)
+
+    if _should_import_feature("claude_code_marketplace"):
+        from litellm.proxy.anthropic_endpoints.claude_code_endpoints import (
+            claude_code_marketplace_router,
+        )
+
+        app.include_router(claude_code_marketplace_router)
+
+    if _should_import_feature("scim"):
+        from litellm.proxy.management_endpoints.scim.scim_v2 import (
+            scim_router,
+        )
+
+        app.include_router(scim_router)
+
+    if _should_import_feature("projects"):
+        from litellm.proxy.management_endpoints.project_endpoints import (
+            router as project_router,
+        )
+
+        app.include_router(project_router)
+
+    if _should_import_feature("cloudzero"):
+        from litellm.proxy.spend_tracking.cloudzero_endpoints import (
+            router as cloudzero_router,
+        )
+
+        app.include_router(cloudzero_router)
+
+    if _should_import_feature("vantage"):
+        from litellm.proxy.spend_tracking.vantage_endpoints import (
+            router as vantage_router,
+        )
+
+        app.include_router(vantage_router)
+
+    if _should_import_feature("usage_ai"):
+        from litellm.proxy.management_endpoints.usage_endpoints import (
+            router as usage_ai_router,
+        )
+
+        app.include_router(usage_ai_router)
+
+    if _should_import_feature("prompts"):
+        from litellm.proxy.prompts.prompt_endpoints import router as prompts_router
+
+        app.include_router(prompts_router)
+
+    if _should_import_feature("jwt_mappings"):
+        from litellm.proxy.management_endpoints.jwt_key_mapping_endpoints import (
+            router as jwt_key_mapping_router,
+        )
+
+        app.include_router(jwt_key_mapping_router)
+
+    if _should_import_feature("compliance"):
+        from litellm.proxy.management_endpoints.compliance_endpoints import (
+            router as compliance_router,
+        )
+
+        app.include_router(compliance_router)
+
+    if _should_import_feature("access_groups"):
+        from litellm.proxy.management_endpoints.access_group_endpoints import (
+            router as access_group_router,
+        )
+
+        app.include_router(access_group_router)
+
+
 app.include_router(router)
 app.include_router(response_router)
 app.include_router(batches_router)
@@ -14104,65 +14315,41 @@ app.include_router(container_router)
 app.include_router(search_router)
 app.include_router(image_router)
 app.include_router(fine_tuning_router)
-app.include_router(vector_store_router)
-app.include_router(vector_store_management_router)
-app.include_router(vector_store_files_router)
 app.include_router(credential_router)
 app.include_router(llm_passthrough_router)
-app.include_router(webrtc_router)
-app.include_router(mcp_management_router)
-app.include_router(mcp_byok_oauth_router)
-app.include_router(anthropic_router)
-app.include_router(anthropic_skills_router)
-app.include_router(evals_router)
-app.include_router(claude_code_marketplace_router)
-app.include_router(google_router)
-app.include_router(langfuse_router)
 app.include_router(pass_through_router)
 app.include_router(health_router)
 app.include_router(key_management_router)
 app.include_router(internal_user_router)
 app.include_router(team_router)
 app.include_router(ui_sso_router)
-app.include_router(scim_router)
 app.include_router(organization_router)
-app.include_router(project_router)
 app.include_router(customer_router)
 app.include_router(spend_management_router)
-app.include_router(cloudzero_router)
-app.include_router(vantage_router)
 app.include_router(caching_router)
 app.include_router(analytics_router)
-app.include_router(guardrails_router)
-app.include_router(policy_router)
-app.include_router(usage_ai_router)
-app.include_router(policy_crud_router)
-app.include_router(policy_resolve_router)
-app.include_router(search_tool_management_router)
-app.include_router(prompts_router)
 app.include_router(callback_management_endpoints_router)
 app.include_router(debugging_endpoints_router)
 app.include_router(ui_crud_endpoints_router)
 app.include_router(openai_files_router)
 app.include_router(team_callback_router)
-app.include_router(jwt_key_mapping_router)
 app.include_router(budget_management_router)
 app.include_router(model_management_router)
 app.include_router(model_access_group_management_router)
 app.include_router(tag_management_router)
-app.include_router(tool_management_router)
 app.include_router(cost_tracking_settings_router)
 app.include_router(router_settings_router)
 app.include_router(fallback_management_router)
 app.include_router(cache_settings_router)
-app.include_router(config_override_router)
 app.include_router(user_agent_analytics_router)
 app.include_router(enterprise_router)
 app.include_router(ui_discovery_endpoints_router)
-app.include_router(agent_endpoints_router)
-app.include_router(compliance_router)
-app.include_router(a2a_router)
-app.include_router(access_group_router)
+
+# Mount optional feature routers. Gated by the LITELLM_SUPPORTED_DB_OBJECTS env
+# var — unset means "load everything" (backward compat), set to a CSV means
+# only those features' routers import. Must run at module scope (before any
+# request arrives) so the imports actually stay out of the process.
+_register_optional_feature_routers(app)
 
 
 async def _stream_mcp_asgi_response(
@@ -14397,6 +14584,5 @@ async def dynamic_mcp_route(mcp_server_name: str, request: Request):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-app.mount(path=BASE_MCP_ROUTE, app=mcp_app)
-app.include_router(mcp_rest_endpoints_router)
-app.include_router(mcp_discoverable_endpoints_router)
+# MCP app mount + rest/discoverable routers are registered inside
+# _register_optional_feature_routers when supported_db_objects includes "mcp".
